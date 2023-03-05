@@ -1,6 +1,6 @@
 //recuration de l'url de la page du produit
 const str = window.location.search;
-console.log(str);
+//console.log(str);
 //chercher les parametres dans Url
 const urlParams = new URLSearchParams(str);
 //recuperer l'ID dans les parametres
@@ -68,10 +68,8 @@ fetch(url_product_api)
 				let contenuPanier = JSON.parse(localStorage.getItem("panierCle"));
                 if (contenuPanier == null) {
                     //initialisation du localStorage dans le cas ou il est vide création d'un tableau
-                    console.log('ici1');
 					return [];				
 				} else {
-                    console.log('ici2');
 					return contenuPanier;
 				}
 			}
@@ -95,16 +93,16 @@ fetch(url_product_api)
 				if (resultat == undefined && couleurSelect.value != "") {
 					produit.quantiteProduit = quantiteSelect.value;  
                     contenuPanier[contenuPanier.length] = produit;
-					//contenuPanier.push(produit);
-                    console.log(produit.quantiteProduit);
-                    console.log('Iciiiiiiiiii1');					 
+					
+                    //console.log(produit.quantiteProduit);
+                    //console.log('Iciiiiiiiiii1');					 
 				} else {
                     //le cas ou les produits sont similaires on incrémente la valeur quantité produit
 					let  incrementeQuantite = parseInt(resultat.quantiteProduit) + parseInt(quantiteSelect.value); 
 					resultat.quantiteProduit = incrementeQuantite;
-                    console.log(parseInt(resultat.quantiteProduit));
-                    console.log(quantiteSelect.value);
-                    console.log('Iciiiiiiiiii2');
+                    //console.log(parseInt(resultat.quantiteProduit));
+                    //console.log(quantiteSelect.value);
+                    //console.log('Iciiiiiiiiii2');
 				}
                 //appel de la fonction ecriture
 				enregistrementPanier(contenuPanier);
@@ -121,6 +119,10 @@ fetch(url_product_api)
 			} else {
 				//Enregistrement du contenu du panier dans le localStorage
 				ajoutProduit(contenuPanier);
+                if (confirm("Commande validée") == true) {
+                    window.location.href = "cart.html";
+                }
+
 			}
 
         });

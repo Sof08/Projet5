@@ -1,5 +1,7 @@
 
-   
+    //lancer API 
+    //cd C:\Users\S\p5\Projet5\back\
+    //node server.js
     fetch("http://localhost:3000/api/products")
     .then((res) => res.json())
     .then((products) => {

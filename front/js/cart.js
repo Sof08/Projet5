@@ -5,7 +5,6 @@ const contenuPanier = JSON.parse(localStorage.getItem("panierCle"));
 
 //Utilisation de l'api pour récuperer les données produit
 function RecupProduitInfo(idProduit) {
-  console.log('hiiii');
   response = fetch('http://localhost:3000/api/products/' + idProduit)
     .then(data => {
       return data.json();
@@ -13,15 +12,21 @@ function RecupProduitInfo(idProduit) {
   return response;
 }
 async function afficherPanier() {
-  //vérfication du contenu panier : doit etre different de null et la taille du tableau aussi
-  if ((contenuPanier !== null || contenuPanier != 0) && contenuPanier.length != 0) {
+  //vérfication du contenu panier 
+  //Affichage du message en cas ou le panier est vide 
+  if (contenuPanier == 0 || contenuPanier == null ) {
+    let h1 = document.querySelector('h1');
+    h1.innerText = "Votre panier est vide";
+  }
+  //le panier doit etre different de null => la taille du tableau aussi
+  else if ((contenuPanier !== null || contenuPanier != 0) && contenuPanier.length != 0) {
     for (let i = 0; i < contenuPanier.length; i++) {
       let produit = contenuPanier[i];
       ProduitInfo = await RecupProduitInfo(produit.idProduit);
       //Ajout des données récupérées dans la page cart.html
       let article = document.createElement('article');
       //Ajout classname a l'article
-      article.className = "cart__produit";
+      article.className = "cart__item";
       //attribuer id produit a data id de l'article
       article.setAttribute("data-id", produit.idProduit);
       //attribuer couleur produit a data-color de l'article
@@ -86,7 +91,8 @@ async function afficherPanier() {
       const deleteItem = document.createElement('p');
       deleteItem.className = "deleteItem";
       deleteItem.textContent = "Supprimer";
-      divGlobalDescription.appendChild(deleteItem);
+      divSupp.appendChild(deleteItem);
+      divGlobalDescription.appendChild(divSupp);
       //Rattacher la div image a article
       article.appendChild(div_img);
       //Rattacher div description a l'article
@@ -98,7 +104,7 @@ async function afficherPanier() {
     supprimerProduit();
   }
 }
-
+afficherPanier();
 //fonction qui permet de calculer la totalité de quantité des produits 
 //Calculer le total des prix des produits ajoutés dans le panier
 async function calculQuantite() {
@@ -173,7 +179,8 @@ function supprimerProduit(){
 }
 
 //Étape 10 : Passer la commande
-//declaration les champs du formulaire 
+//declaration des champs du formulaire 
+//la possibilité, sur la page Panier, de saisir les coordonnées puis de confirmer la commande.
 const prenom = document.querySelector("#firstName");
 const nom = document.querySelector("#lastName");
 const adresse = document.querySelector("#address");
@@ -196,13 +203,13 @@ const mailRegex = /^[_a-z0-9-]+(.[_a-z0-9-]+)*@[a-z0-9-]+(.[a-z0-9-]+)*(.[a-z]{2
 
 
 //verification des champs du formulaire 
-function VerifFormulaire(){
+function VerifFormulaire(bool){
   prenom.addEventListener("change", () => {
     if ((prenom.value).match(prenomRegex)) {
       prenomErreur.innerHTML = "";
     } else {
       prenomErreur.innerHTML = "Format incorrect";
-      return false;
+      return bool= false;
     }
   });
   nom.addEventListener("change", () => {
@@ -210,7 +217,7 @@ function VerifFormulaire(){
       nomErreur.innerHTML = "";
     } else {
       nomErreur.innerHTML = "Format incorrect";
-      return false;
+      return bool= false;
     }
   });
   adresse.addEventListener("change", () => {
@@ -218,7 +225,7 @@ function VerifFormulaire(){
       adresseErreur.innerHTML = "";
     } else {
       adresseErreur.innerHTML = "Format incorrect";
-      return false;
+      return bool= false;
     }
   });
   ville.addEventListener("change", () => {
@@ -226,7 +233,7 @@ function VerifFormulaire(){
       villeErreur.innerHTML = "";
     } else {
       villeErreur.innerHTML = "Format incorrect";
-      return false;
+      return bool= false;
     }
   });
   mail.addEventListener("change", () => {
@@ -234,8 +241,9 @@ function VerifFormulaire(){
       mailErreur.innerHTML = "";
     } else {
       mailErreur.innerHTML = "Format incorrect";
-      return false;
+      return bool= false;
     }
+    return bool;
   });
   
 
@@ -243,8 +251,66 @@ function VerifFormulaire(){
 }
 VerifFormulaire();
 
+//verfications des champs vides + messages d'erreur && envoi du formulaire
+document.querySelector("#order").addEventListener("click", (e) => {
+  if (nom.value == "" || prenom.value == "" || adresse.value == "" || ville.value == "" || mail.value == "") {
+    alert("Veuillez saisir les champs du formulaire");
+  }
+  else if (nomErreur.innerHTML !== "" || prenomErreur.innerHTML !== "" || adresseErreur.innerHTML !== "" || villeErreur.innerHTML !== "" || mailErreur.innerHTML !== "") {
+    alert("Veuillez vérifier les messages d'erreurs dans le formulaire");
+  }
+  else {
+    //Déclaration d'un tableau vide qui va contenir les produits d'un panier
+    let produits = [];
+    //ajouter un produit dans le tableau
+    for (let produit of contenuPanier) {
+			produits.push(produit.idProduit);
+		}
+    //definir l'objet order les données  + les paramètres  : méthode POST, en-têtes,
+    let order = {
+      contact: {
+        firstName: prenom.value,
+        lastName: nom.value,
+        address: adresse.value,
+        city: ville.value,
+        email: mail.value
+      },
+      products: produits
+    };
+
+  
+
+    const options = {
+      method: 'POST',
+      body: JSON.stringify(order),
+      headers: {
+        'Content-Type': 'application/json',
+        'Accept': 'application/json'
+      }
+
+  };
+
+  fetch('http://localhost:3000/api/products/order', options)
+    // obtenir le corps de réponse et lecture du corps en tant que JSON
+      .then((response) => response.json())
+      .then((data) => {
+        //Vider le localStorage
+        localStorage.clear();
+        //Redirection  sur la page Confirmation, en passant l’id de commande 
+        //dans l’URL, dans le but d’afficher le numéro de commande
+        window.location.href = "confirmation.html?orderId=" + data.orderId;          
+      });
+    
+
+  
+
+
+ 
+   
+  }
+ 
+})
 
 
 
-afficherPanier();
-console.log(contenuPanier);
+
