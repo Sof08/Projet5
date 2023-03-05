@@ -6,6 +6,7 @@ const urlParams = new URLSearchParams(str);
 //recuperer l'ID dans les parametres
 const id_product = urlParams.get('id');
 
+
 //console.log(id_product);
 const url_product_api = `http://localhost:3000/api/products/${id_product}`;
 
@@ -110,11 +111,11 @@ fetch(url_product_api)
 				
 			}
 			
-            //Verification si le choix de couleur est vide evoye un message d'erreur 
-			if (couleurSelect.value === "") {
+            //Verification si le choix de couleur est vide envoyer un message d'erreur 
+			if (couleurSelect.value == "") {
 				alert("Veuillez sélectionner une couleur !");
 			}
-			// Si la quantité sélectionnée est nulle OU si elle dépasse 100
+			// Si la quantité sélectionnée est nulle OU si elle dépasse 100 envoyer un message d'erreur
 			else if ( quantiteSelect.value <= 0 || quantiteSelect.value > 100) {
 				alert("Veuillez sélectionner une quantité valide !");
 			} else {
