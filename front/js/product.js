@@ -1,30 +1,32 @@
-//recuration de l'url de la page du produit
+//recuperation de l'url de la page du produit
 const str = window.location.search;
 //console.log(str);
-//chercher les parametres dans Url
+//chercher les parametres dans Url ?
 const urlParams = new URLSearchParams(str);
+
 //recuperer l'ID dans les parametres
 const id_product = urlParams.get('id');
 
 
 //console.log(id_product);
-const url_product_api = `http://localhost:3000/api/products/${id_product}`;
-
+const url_product_api = "http://localhost:3000/api/products/"+id_product;
+//creation dun fetch connection a l'url product
 fetch(url_product_api)
     .then((res) => res.json())
     .then((product) => {
         //image
+        //creation d'element dans la page produit
         const imageElement = document.createElement("img");
+        //on rattache l'element creer qui correspond nom dans l'api
         imageElement.src = product.imageUrl;
+        //on recupere la classe a travers le query et on rattache le parent
         document.querySelector('.item__img').appendChild(imageElement);
 
-        //nom produit
         const nomElement = document.createElement("name");
-        //product.name concerne l'api
         nomElement.innerText = product.name;
         document.querySelector('.item__content__titlePrice').appendChild(nomElement);
 
-        //prix du produit
+        //prix du produit, ID html query
         document.querySelector('#price').textContent = product.price;
         //description du produit
         //querySelector concerne l'id dans html, textContent ou innertext concerne l'api
@@ -54,42 +56,42 @@ fetch(url_product_api)
 
         //Assigner la fonction click
         button.addEventListener("click", () => {
-            let contenuPanier = null;
+            let contenuPanier = undefined;
             //initialisation du contenu du panier
 			contenuPanier = {
-				//Ajout la charge utile
+				//Ajout la charge utile selectionnn
 				idProduit: id_product,
 				couleurProduit: couleurSelect.value,
 				quantiteProduit: quantiteSelect.value
 			};
-            //verfication de l'état du panier / getItem => lecture
+            //verfication de l'état du panier / getItem => lecture du panier
             
             function lecturePanier() {
+                //???
 				let contenuPanier = JSON.parse(localStorage.getItem("panierCle"));
                 if (contenuPanier == null) {
                     //initialisation du localStorage dans le cas ou il est vide création d'un tableau
-					return [];				
+					return [];	
+                    //si le panier est vide on retourn au contenu du panier			
 				} else {
 					return contenuPanier;
 				}
 			}
-            //Enregistrement du panier / setItem =>écriture
-            function enregistrementPanier(contenuPanier) {
-				localStorage.setItem("panierCle", JSON.stringify(contenuPanier));
-			}
+            
 
             function ajoutProduit(produit) {
-                //appel de la fonction de lecture get
+                //appel de la fonction de lecture getItem
 				let contenuPanier = lecturePanier();
 				//https://developer.mozilla.org/fr/docs/Web/JavaScript/Reference/Global_Objects/Array/find =>lien utilisé
 				let resultat = contenuPanier.find(
-                    //Comparer les l'id et la couleur du produit sélectionné et les valeurs des produits dans LocalStorage
+                    //Test les l'id et la couleur du produit sélectionné, on test les valeurs et les types des produits dans LocalStorage
 					(element) =>
 						element.idProduit === produit.idProduit &&
 						element.couleurProduit === produit.couleurProduit	
 				); 
                 //Point de vigilance du projet !!
-                //si les produits sont différents (pas le meme ID et pas la meme couleur) => la valeur undefined est renvoyée.
+                //si les produits sont différents (pas le meme ID et pas,
+                //la meme couleur) => la valeur undefined est renvoyée.
 				if (resultat == undefined && couleurSelect.value != "") {
 					produit.quantiteProduit = quantiteSelect.value;  
                     contenuPanier[contenuPanier.length] = produit;
@@ -104,10 +106,12 @@ fetch(url_product_api)
                     //console.log(quantiteSelect.value);
                     //console.log('Iciiiiiiiiii2');
 				}
-                //appel de la fonction ecriture
-				enregistrementPanier(contenuPanier);
+                //Function enregistrement panier localstorage
+				localStorage.setItem("panierCle", JSON.stringify(contenuPanier));
+
+                console.log(contenuPanier);
 				
-			}
+			}  
 			
             //Verification si le choix de couleur est vide envoyer un message d'erreur 
 			if (couleurSelect.value == "") {
@@ -120,6 +124,7 @@ fetch(url_product_api)
 				//Enregistrement du contenu du panier dans le localStorage
 				ajoutProduit(contenuPanier);
                 if (confirm("Commande validée") == true) {
+                    //passage à la page panier
                     window.location.href = "cart.html";
                 }
 

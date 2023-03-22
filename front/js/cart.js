@@ -3,7 +3,7 @@ const contenuPanier = JSON.parse(localStorage.getItem("panierCle"));
 
 //console.log(contenuPanier);
 
-//Utilisation de l'api pour récuperer les données produit
+//Utilisation de l'api pour récuperer les données produit qui ne sont pas dans le localStorage
 function RecupProduitInfo(idProduit) {
   response = fetch('http://localhost:3000/api/products/' + idProduit)
     .then(data => {
@@ -14,14 +14,16 @@ function RecupProduitInfo(idProduit) {
 async function afficherPanier() {
   //vérfication du contenu panier 
   //Affichage du message en cas ou le panier est vide 
-  if (contenuPanier == 0 || contenuPanier == null ) {
+  if (contenuPanier == 0 || contenuPanier == undefined ) {
     let h1 = document.querySelector('h1');
     h1.innerText = "Votre panier est vide";
   }
   //le panier doit etre different de null => la taille du tableau aussi
-  else if ((contenuPanier !== null || contenuPanier != 0) && contenuPanier.length != 0) {
+  else if ((contenuPanier !== undefined || contenuPanier != 0) && contenuPanier.length != 0) {
     for (let i = 0; i < contenuPanier.length; i++) {
       let produit = contenuPanier[i];
+      //Fonction utilisé pour recuperer les informations de l'api produit qui ne sont
+      // pas dans le local storage en ce basant sur ID.produit selectionné
       ProduitInfo = await RecupProduitInfo(produit.idProduit);
       //Ajout des données récupérées dans la page cart.html
       let article = document.createElement('article');
@@ -66,11 +68,11 @@ async function afficherPanier() {
       const QuantiteElement = document.createElement("p");
       QuantiteElement.textContent = "Qté :";
       //construction input quantite
-      //produit.cquantiteProduit
+      //produit.cquantiteProduit contenu html
       const InputQuantite = document.createElement("input");
       InputQuantite.type = "number";
       InputQuantite.className = "itemQuantity";
-      InputQuantite.name = "itemQuantity";
+      InputQuantite.name = "itemQuantity";D
       InputQuantite.min = "1";
       InputQuantite.max = "100";
       InputQuantite.value = produit.quantiteProduit;
@@ -99,12 +101,19 @@ async function afficherPanier() {
       article.appendChild(divGlobalDescription);
     }
     //affichage de la quantité et du prix total des produits
+    //appel des fonctions defini plus bas
     calculQuantite();
     modifierQuantite();
     supprimerProduit();
   }
 }
 afficherPanier();
+
+
+
+
+
+
 //fonction qui permet de calculer la totalité de quantité des produits 
 //Calculer le total des prix des produits ajoutés dans le panier
 async function calculQuantite() {
@@ -116,7 +125,7 @@ async function calculQuantite() {
     quantitetotal = parseInt(value) + quantitetotal;
   }
   document.querySelector("#totalQuantity").innerText = quantitetotal;
-
+//calcul du prix total
   let prixtotal = 0;
 
   for (let i = 0; i < contenuPanier.length; i++) {
@@ -126,7 +135,7 @@ async function calculQuantite() {
     prixtotal  =  nouveauPrix + prixtotal;
 
   }
-
+//Affichage du prix total??? ou
   document.querySelector("#totalPrice").innerHTML = prixtotal;
 
 }
@@ -279,7 +288,8 @@ document.querySelector("#order").addEventListener("click", (e) => {
     };
 
   
-
+//envoyer les contenus du panier + donnees du formulaire en utilisant methode POST 
+//https://reqbin-com.translate.goog/code/javascript/wzp2hxwh/javascript-post-request-example?_x_tr_sl=en&_x_tr_tl=fr&_x_tr_hl=fr&_x_tr_pto=sc
     const options = {
       method: 'POST',
       body: JSON.stringify(order),
@@ -289,13 +299,12 @@ document.querySelector("#order").addEventListener("click", (e) => {
       }
 
   };
-
+// on envoie le panier + données formulaire à l
   fetch('http://localhost:3000/api/products/order', options)
     // obtenir le corps de réponse et lecture du corps en tant que JSON
       .then((response) => response.json())
       .then((data) => {
-        //Vider le localStorage
-        localStorage.clear();
+
         //Redirection  sur la page Confirmation, en passant l’id de commande 
         //dans l’URL, dans le but d’afficher le numéro de commande
         window.location.href = "confirmation.html?orderId=" + data.orderId;          
