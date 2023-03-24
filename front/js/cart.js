@@ -17,6 +17,8 @@ async function afficherPanier() {
   if (contenuPanier == 0 || contenuPanier == undefined ) {
     let h1 = document.querySelector('h1');
     h1.innerText = "Votre panier est vide";
+    const formulaire = document.querySelector(".cart");
+    formulaire.style.display = 'none';
   }
   //le panier doit etre different de null => la taille du tableau aussi
   else if ((contenuPanier !== undefined || contenuPanier != 0) && contenuPanier.length != 0) {
@@ -72,7 +74,7 @@ async function afficherPanier() {
       const InputQuantite = document.createElement("input");
       InputQuantite.type = "number";
       InputQuantite.className = "itemQuantity";
-      InputQuantite.name = "itemQuantity";D
+      InputQuantite.name = "itemQuantity";
       InputQuantite.min = "1";
       InputQuantite.max = "100";
       InputQuantite.value = produit.quantiteProduit;
@@ -129,11 +131,12 @@ async function calculQuantite() {
   let prixtotal = 0;
 
   for (let i = 0; i < contenuPanier.length; i++) {
+   
+
     let element = contenuPanier[i];
     produitInfo =   await RecupProduitInfo(element.idProduit);
     nouveauPrix = quantite[i].value * produitInfo.price;
     prixtotal  =  nouveauPrix + prixtotal;
-
   }
 //Affichage du prix total??? ou
   document.querySelector("#totalPrice").innerHTML = prixtotal;
@@ -163,6 +166,7 @@ function modifierQuantite() {
 
 
 
+
 //Supprimer un produit du panier 
 function supprimerProduit(){
   //Selectionner tous  les boutons supprimer 
@@ -170,6 +174,9 @@ function supprimerProduit(){
   produitSupprime.forEach(element => {
       element.addEventListener("click",function (event) {
         /****Cibler le produit qu'on souhaite supprimer****/
+        //Produit à supprimer
+        const prodSupp = event.target.closest("article");
+        
         //Récupérer l’ID du produit selectionné => data-id
         const idprodSupp = event.target.closest("article").getAttribute("data-id");
         //Récuperer la couleur du produit selectionné => data-color 
@@ -179,6 +186,7 @@ function supprimerProduit(){
         nouveauPanier = contenuPanier.filter(
             element => element.idProduit !== idprodSupp || element.couleurProduit !== couleurprodSupp
         );
+    
         //Enregistrement du nouveau panier dans localStorage
         localStorage.setItem("panierCle", JSON.stringify(nouveauPanier));
         //rafraîchissement forcé du document afin d'afficher le nouveau panier
@@ -212,56 +220,39 @@ const mailRegex = /^[_a-z0-9-]+(.[_a-z0-9-]+)*@[a-z0-9-]+(.[a-z0-9-]+)*(.[a-z]{2
 
 
 //verification des champs du formulaire 
-function VerifFormulaire(bool){
-  prenom.addEventListener("change", () => {
-    if ((prenom.value).match(prenomRegex)) {
-      prenomErreur.innerHTML = "";
-    } else {
-      prenomErreur.innerHTML = "Format incorrect";
-      return bool= false;
-    }
-  });
-  nom.addEventListener("change", () => {
-    if ((nom.value).match(nomRegex)) {
-      nomErreur.innerHTML = "";
-    } else {
-      nomErreur.innerHTML = "Format incorrect";
-      return bool= false;
-    }
-  });
-  adresse.addEventListener("change", () => {
-    if ((adresse.value).match(adresseRegex)) {
-      adresseErreur.innerHTML = "";
-    } else {
-      adresseErreur.innerHTML = "Format incorrect";
-      return bool= false;
-    }
-  });
-  ville.addEventListener("change", () => {
-    if ((ville.value).match(villeRegex)) {
-      villeErreur.innerHTML = "";
-    } else {
-      villeErreur.innerHTML = "Format incorrect";
-      return bool= false;
-    }
-  });
-  mail.addEventListener("change", () => {
-    if ((mail.value).match(mailRegex)) {
-      mailErreur.innerHTML = "";
-    } else {
-      mailErreur.innerHTML = "Format incorrect";
-      return bool= false;
-    }
-    return bool;
-  });
-  
-
-
+function VerifFormulaire(){
+  //Fonction de verification de chaque input & masque 
+    FormTest = (input, masque, erreur) => {
+      if ((input.value).match(masque)) {
+        erreur.innerHTML = "";
+      } else {
+        erreur.innerHTML = "Format incorrect";
+        return false;
+      }
+    };
+    //appliquer fonction FormTest sur les champs input du formulaire
+    prenom.addEventListener("change", () => {
+      FormTest(prenom, prenomRegex, prenomErreur);
+    });
+    nom.addEventListener("change", () => {
+      FormTest(nom, nomRegex, nomErreur);
+    });
+    adresse.addEventListener("change", () => {
+      FormTest(adresse, adresseRegex, adresseErreur);
+    });
+    ville.addEventListener("change", () => {
+      FormTest(ville, villeRegex, villeErreur);
+    });
+    mail.addEventListener("change", () => {
+      FormTest(mail, mailRegex, mailErreur);
+    });
 }
 VerifFormulaire();
 
 //verfications des champs vides + messages d'erreur && envoi du formulaire
 document.querySelector("#order").addEventListener("click", (e) => {
+  //Annuler le comportement par défaut
+  e.preventDefault();
   if (nom.value == "" || prenom.value == "" || adresse.value == "" || ville.value == "" || mail.value == "") {
     alert("Veuillez saisir les champs du formulaire");
   }

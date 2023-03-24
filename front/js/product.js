@@ -32,7 +32,7 @@ fetch(url_product_api)
         //querySelector concerne l'id dans html, textContent ou innertext concerne l'api
         document.querySelector('#description').textContent = product.description;
         
-        //liste des couleurs recuperation des couleurs dans l'api
+        //liste des couleurs recuperation des couleurs dans l'api 
         const couleurs = product.colors;
         //faire une boucle sur le tableau couleur vu dans l'api, pour parcourir et selectionner les couleurs une à une
         for (const couleur of couleurs) {
@@ -69,7 +69,7 @@ fetch(url_product_api)
             function lecturePanier() {
                 //???
 				let contenuPanier = JSON.parse(localStorage.getItem("panierCle"));
-                if (contenuPanier == null) {
+                if (contenuPanier == undefined) {
                     //initialisation du localStorage dans le cas ou il est vide création d'un tableau
 					return [];	
                     //si le panier est vide on retourn au contenu du panier			
@@ -123,7 +123,7 @@ fetch(url_product_api)
 			} else {
 				//Enregistrement du contenu du panier dans le localStorage
 				ajoutProduit(contenuPanier);
-                if (confirm("Commande validée") == true) {
+                if (confirm("Produit ajouté dans le panier") == true) {
                     //passage à la page panier
                     window.location.href = "cart.html";
                 }
